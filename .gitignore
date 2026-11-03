@@ -1,0 +1,39 @@
+# Environment variables
+.env
+*.env
+
+# Build outputs
+/bin/
+/dist/
+github-contribution-city
+*.exe
+*.test
+*.out
+
+# Dependencies and caches
+node_modules/
+.venv/
+__pycache__/
+.bob/mcp.json
+.playwright-mcp/
+
+# Project rule exclusions
+AGENTS.md
+_*
+
+# Binary artifacts & OS files
+*.onnx
+*.onnx.data
+*.so
+*.tgz
+*.tar.gz
+*.zip
+*.dylib
+.DS_Store
+
+# Ignore contents of input and output folders except keep the folders
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+
