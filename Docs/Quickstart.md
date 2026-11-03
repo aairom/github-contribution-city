@@ -81,8 +81,14 @@ go run cmd/city/main.go -batch input/
 
 ---
 
-## 5. Running with Podman / Docker
+## 5. Running with Podman / Docker & Docker Compose
 
+### Using Docker Compose
+```bash
+docker compose up -d
+```
+
+### Using Podman / Docker CLI
 ```bash
 # Build container image
 podman build -t github-contribution-city .
@@ -92,4 +98,22 @@ podman run -d -p 8088:8088 --name contribution-city github-contribution-city
 
 # Access in browser
 open http://localhost:8088/
+```
+
+---
+
+## 6. Makefile Tooling
+
+```bash
+# Build binary
+make build
+
+# Run unit and integration tests with coverage
+make test
+
+# Code formatting and linting
+make lint
+
+# Cross-compile for Linux, macOS, and Windows
+make build-all
 ```

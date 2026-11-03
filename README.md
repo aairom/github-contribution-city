@@ -124,6 +124,7 @@ podman run -d -p 8088:8088 github-contribution-city
 
 - [Quickstart Guide](Docs/Quickstart.md)
 - [Architecture & Design](Docs/Architecture.md)
+- [GitHub Actions & Automation Guide](Docs/GitHub-Actions.md)
 
 ---
 

@@ -92,6 +92,14 @@ The week with the highest contribution activity receives a broadcast antenna and
 
 ```
 .
+├── .github/
+│   ├── dependabot.yml            # Automated dependency updates configuration
+│   └── workflows/
+│       ├── ci.yml                # CI: lint, tests, vulnerability scan, cross-builds
+│       ├── docker.yml            # Multi-arch container build and push to GHCR
+│       ├── docs.yml              # Documentation & interactive demo deployment
+│       ├── release.yml           # Automated GitHub releases with binary assets
+│       └── update-city.yml       # Scheduled daily contribution city update
 ├── cmd/
 │   └── city/
 │       ├── main.go               # Application entrypoint (CLI & HTTP Server)
@@ -119,11 +127,14 @@ The week with the highest contribution activity receives a broadcast antenna and
 │   └── cleanup-containers.sh     # Container image cleanup script
 ├── Docs/
 │   ├── Architecture.md           # Architecture and system documentation
+│   ├── GitHub-Actions.md         # CI/CD and automation workflow guide
 │   └── Quickstart.md             # Getting started guide
 ├── input/                        # Batch input folder
 ├── output/                       # Generated timestamped output files
 ├── Containerfile                 # Podman multi-stage containerfile
 ├── Dockerfile                    # Docker multi-stage dockerfile
+├── Makefile                      # Build, test, lint, and cross-compilation automation
+├── docker-compose.yml            # Docker Compose service definition
 ├── go.mod                        # Go module definition
 ├── README.md                     # Project overview and documentation
 └── .env.example                  # Environment configuration template
