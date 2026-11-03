@@ -1,0 +1,67 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'Docs/**'
+      - 'README.md'
+      - 'web/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy-pages:
+    name: Build & Deploy Interactive Site
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Build Demo and Documentation Site
+        run: |
+          mkdir -p site_build/demo
+          go build -o bin/github-contribution-city cmd/city/main.go
+
+          # Generate sample live cities for demo
+          ./bin/github-contribution-city \
+            -user "${{ github.repository_owner }}" \
+            -theme "github-dark" \
+            -format all \
+            -output "site_build/demo/city"
+
+          # Create landing index.html redirecting to or embedding the 3D interactive viewer
+          cp site_build/demo/city.html site_build/index.html
+          cp -r Docs site_build/docs
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site_build'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

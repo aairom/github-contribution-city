@@ -1,0 +1,90 @@
+name: Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build Multi-Arch Binaries and Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Extract Tag Name & Metadata
+        id: meta
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "Building binaries for release: ${TAG_NAME}"
+
+      - name: Compile Cross-Platform Binaries
+        env:
+          CGO_ENABLED: 0
+          VERSION: ${{ steps.meta.outputs.tag }}
+        run: |
+          mkdir -p dist
+          LDFLAGS="-s -w -X main.version=${VERSION} -X main.commit=${GITHUB_SHA} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          # Targets: OS/ARCH
+          PLATFORMS=(
+            "linux/amd64"
+            "linux/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+            "windows/amd64"
+            "windows/arm64"
+          )
+
+          for PLATFORM in "${PLATFORMS[@]}"; do
+            GOOS="${PLATFORM%/*}"
+            GOARCH="${PLATFORM#*/}"
+            EXT=""
+            if [ "$GOOS" = "windows" ]; then
+              EXT=".exe"
+            fi
+            
+            BIN_NAME="github-contribution-city-${VERSION}-${GOOS}-${GOARCH}${EXT}"
+            echo "🔨 Compiling ${BIN_NAME}..."
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="${LDFLAGS}" -o "dist/${BIN_NAME}" cmd/city/main.go
+            
+            # Create tar.gz / zip archive
+            cd dist
+            if [ "$GOOS" = "windows" ]; then
+              zip "github-contribution-city-${VERSION}-${GOOS}-${GOARCH}.zip" "${BIN_NAME}"
+            else
+              tar -czf "github-contribution-city-${VERSION}-${GOOS}-${GOARCH}.tar.gz" "${BIN_NAME}"
+            fi
+            cd ..
+          done
+
+      - name: Generate Checksums
+        run: |
+          cd dist
+          sha256sum github-contribution-city-* > checksums.txt
+          cat checksums.txt
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "GitHub Contribution City ${{ steps.meta.outputs.tag }}"
+          tag_name: ${{ steps.meta.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt

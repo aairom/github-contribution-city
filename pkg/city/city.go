@@ -29,38 +29,38 @@ const (
 type Cell struct {
 	Char        rune     `json:"char"`
 	Kind        CellKind `json:"kind"`
-	Level       int      `json:"level"`       // 0-4 contribution intensity level
-	Count       int      `json:"count"`       // actual contribution count
-	WeekIndex   int      `json:"week_index"`  // -1 if none
-	DayIndex    int      `json:"day_index"`   // 0-6 (Sun-Sat), -1 if none
-	Date        string   `json:"date"`        // YYYY-MM-DD
+	Level       int      `json:"level"`      // 0-4 contribution intensity level
+	Count       int      `json:"count"`      // actual contribution count
+	WeekIndex   int      `json:"week_index"` // -1 if none
+	DayIndex    int      `json:"day_index"`  // 0-6 (Sun-Sat), -1 if none
+	Date        string   `json:"date"`       // YYYY-MM-DD
 	TooltipText string   `json:"tooltip"`
 }
 
 // Building3D represents a 3D building block in the isometric / WebGL world
 type Building3D struct {
-	WeekIndex     int                  `json:"week_index"`
-	FirstDay      string               `json:"first_day"`
-	WeeklyTotal   int                  `json:"weekly_total"`
-	GridX         float64              `json:"grid_x"` // Position along street (e.g. 0 to 52)
-	GridZ         float64              `json:"grid_z"` // Depth offset (0 for main street, +/- for district)
-	Width         float64              `json:"width"`
-	Depth         float64              `json:"depth"`
-	Height        float64              `json:"height"`
-	Floors        int                  `json:"floors"`
-	HasAntenna    bool                 `json:"has_antenna"`
-	Days          []BuildingDayDetails `json:"days"`
-	District      string               `json:"district"`
-	ColorPrimary  string               `json:"color_primary"`
-	ColorWindows  []string             `json:"color_windows"`
+	WeekIndex    int                  `json:"week_index"`
+	FirstDay     string               `json:"first_day"`
+	WeeklyTotal  int                  `json:"weekly_total"`
+	GridX        float64              `json:"grid_x"` // Position along street (e.g. 0 to 52)
+	GridZ        float64              `json:"grid_z"` // Depth offset (0 for main street, +/- for district)
+	Width        float64              `json:"width"`
+	Depth        float64              `json:"depth"`
+	Height       float64              `json:"height"`
+	Floors       int                  `json:"floors"`
+	HasAntenna   bool                 `json:"has_antenna"`
+	Days         []BuildingDayDetails `json:"days"`
+	District     string               `json:"district"`
+	ColorPrimary string               `json:"color_primary"`
+	ColorWindows []string             `json:"color_windows"`
 }
 
 // BuildingDayDetails contains daily metrics per floor/facet
 type BuildingDayDetails struct {
-	Date    string `json:"date"`
-	Weekday int    `json:"weekday"`
-	Count   int    `json:"count"`
-	Level   int    `json:"level"`
+	Date     string `json:"date"`
+	Weekday  int    `json:"weekday"`
+	Count    int    `json:"count"`
+	Level    int    `json:"level"`
 	LevelStr string `json:"level_str"`
 }
 
@@ -73,18 +73,18 @@ type Options struct {
 
 // CityScene is the complete processed representation of the city
 type CityScene struct {
-	Username           string         `json:"username"`
-	TotalContributions int            `json:"total_contributions"`
-	MaxWeeklyTotal     int            `json:"max_weekly_total"`
-	BusiestWeekIndex   int            `json:"busiest_week_index"`
-	BusiestWeekDate    string         `json:"busiest_week_date"`
-	AverageWeekly      float64        `json:"average_weekly"`
-	GridWidth          int            `json:"grid_width"`
-	GridHeight         int            `json:"grid_height"`
-	Grid               [][]Cell       `json:"grid"`
-	Buildings3D        []Building3D   `json:"buildings_3d"`
-	MonthLabels        []MonthLabel   `json:"month_labels"`
-	GeneratedAt        time.Time      `json:"generated_at"`
+	Username           string       `json:"username"`
+	TotalContributions int          `json:"total_contributions"`
+	MaxWeeklyTotal     int          `json:"max_weekly_total"`
+	BusiestWeekIndex   int          `json:"busiest_week_index"`
+	BusiestWeekDate    string       `json:"busiest_week_date"`
+	AverageWeekly      float64      `json:"average_weekly"`
+	GridWidth          int          `json:"grid_width"`
+	GridHeight         int          `json:"grid_height"`
+	Grid               [][]Cell     `json:"grid"`
+	Buildings3D        []Building3D `json:"buildings_3d"`
+	MonthLabels        []MonthLabel `json:"month_labels"`
+	GeneratedAt        time.Time    `json:"generated_at"`
 }
 
 // MonthLabel marks where a month begins across columns
@@ -162,7 +162,7 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 	// 2D Grid Setup
 	// Each building is 2 character cells wide + 1 cell space or compact (2 cells per week)
 	// Additional top rows for Sky, Clouds, Antenna (2 rows), Roof (1 row), MaxHeight floors, Street (1 row), Month label (1 row)
-	topPadding := 3 // for antenna and sky
+	topPadding := 3                               // for antenna and sky
 	gridHeight := topPadding + opts.MaxHeight + 2 // + street + month labels
 	gridWidth := numWeeks * 2
 
@@ -171,11 +171,11 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 		grid[r] = make([]Cell, gridWidth)
 		for c := 0; c < gridWidth; c++ {
 			grid[r][c] = Cell{
-				Char: ' ',
-				Kind: CellSky,
-				Level: 0,
+				Char:      ' ',
+				Kind:      CellSky,
+				Level:     0,
 				WeekIndex: -1,
-				DayIndex: -1,
+				DayIndex:  -1,
 			}
 		}
 	}
@@ -186,11 +186,11 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 	// Fill Street
 	for c := 0; c < gridWidth; c++ {
 		grid[streetRow][c] = Cell{
-			Char: '=',
-			Kind: CellStreet,
-			Level: 0,
+			Char:      '=',
+			Kind:      CellStreet,
+			Level:     0,
 			WeekIndex: -1,
-			DayIndex: -1,
+			DayIndex:  -1,
 		}
 	}
 
@@ -235,19 +235,19 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 			antennaRowMid := streetRow - bHeight - 1
 			if antennaRowTop >= 0 {
 				grid[antennaRowTop][colStart] = Cell{
-					Char: '|',
-					Kind: CellAntenna,
-					Level: 4,
-					WeekIndex: wIdx,
+					Char:        '|',
+					Kind:        CellAntenna,
+					Level:       4,
+					WeekIndex:   wIdx,
 					TooltipText: "Busiest Week Antenna",
 				}
 			}
 			if antennaRowMid >= 0 {
 				grid[antennaRowMid][colStart] = Cell{
-					Char: '+',
-					Kind: CellAntenna,
-					Level: 4,
-					WeekIndex: wIdx,
+					Char:        '+',
+					Kind:        CellAntenna,
+					Level:       4,
+					WeekIndex:   wIdx,
 					TooltipText: "Busiest Week Antenna",
 				}
 			}
@@ -257,15 +257,15 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 		roofRow := streetRow - bHeight
 		if roofRow >= 0 {
 			grid[roofRow][colStart] = Cell{
-				Char: '[',
-				Kind: CellRoof,
-				Level: 0,
+				Char:      '[',
+				Kind:      CellRoof,
+				Level:     0,
 				WeekIndex: wIdx,
 			}
 			grid[roofRow][colStart+1] = Cell{
-				Char: ']',
-				Kind: CellRoof,
-				Level: 0,
+				Char:      ']',
+				Kind:      CellRoof,
+				Level:     0,
 				WeekIndex: wIdx,
 			}
 		}
@@ -324,18 +324,18 @@ func (b *Builder) Build(cal *github.ContributionCalendar, opts Options) *CitySce
 
 		// 3D Building Object
 		buildings3D[wIdx] = Building3D{
-			WeekIndex:    wIdx,
-			FirstDay:     w.FirstDay,
-			WeeklyTotal:  wTotal,
-			GridX:        float64(wIdx) * 1.8,
-			GridZ:        float64(wIdx%3 - 1) * 0.4, // subtle stagger for city depth
-			Width:        1.4,
-			Depth:        1.4,
-			Height:       float64(bHeight) * 0.75,
-			Floors:       bHeight,
-			HasAntenna:   hasAntenna,
-			Days:         dayDetails,
-			District:     getDistrict(wIdx, numWeeks),
+			WeekIndex:   wIdx,
+			FirstDay:    w.FirstDay,
+			WeeklyTotal: wTotal,
+			GridX:       float64(wIdx) * 1.8,
+			GridZ:       float64(wIdx%3-1) * 0.4, // subtle stagger for city depth
+			Width:       1.4,
+			Depth:       1.4,
+			Height:      float64(bHeight) * 0.75,
+			Floors:      bHeight,
+			HasAntenna:  hasAntenna,
+			Days:        dayDetails,
+			District:    getDistrict(wIdx, numWeeks),
 		}
 	}
 

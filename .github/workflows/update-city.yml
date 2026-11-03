@@ -1,0 +1,103 @@
+name: Daily Contribution City Update
+
+on:
+  schedule:
+    # Runs everyday at 03:17 UTC
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      custom_user:
+        description: 'Optional specific GitHub username to generate for'
+        required: false
+        default: ''
+      theme:
+        description: 'Theme to use (github-dark, github-light, cyberpunk, mono, neon, matrix)'
+        required: false
+        default: 'github-dark'
+
+permissions:
+  contents: write
+
+jobs:
+  update-visualizations:
+    name: Regenerate Contribution Cities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Build Contribution City CLI
+        run: |
+          go build -o bin/github-contribution-city cmd/city/main.go
+
+      - name: Generate Visualizations
+        env:
+          GITHUB_TOKEN: ${{ secrets.CONTRIBUTION_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p output
+          PRIMARY_USER="${{ inputs.custom_user || github.repository_owner }}"
+          SELECTED_THEME="${{ inputs.theme || 'github-dark' }}"
+
+          echo "🌆 Generating contribution city for primary user: ${PRIMARY_USER} (Theme: ${SELECTED_THEME})..."
+
+          # 1. Generate primary user 2D SVG Skyline
+          ./bin/github-contribution-city \
+            -user "${PRIMARY_USER}" \
+            -weeks 53 \
+            -height 14 \
+            -theme "${SELECTED_THEME}" \
+            -format svg \
+            -output "output/contribution-city.svg"
+
+          # 2. Generate primary user 3D Isometric SVG
+          ./bin/github-contribution-city \
+            -user "${PRIMARY_USER}" \
+            -weeks 53 \
+            -height 14 \
+            -theme "cyberpunk" \
+            -format iso \
+            -output "output/contribution-city-3d.svg"
+
+          # 3. Generate primary user 3D Interactive HTML
+          ./bin/github-contribution-city \
+            -user "${PRIMARY_USER}" \
+            -weeks 53 \
+            -height 14 \
+            -theme "${SELECTED_THEME}" \
+            -format html \
+            -output "output/contribution-city.html"
+
+          # 4. If tracked users exist in input/ directory, batch process them
+          if [ -d "input" ] && [ "$(ls -A input 2>/dev/null)" ]; then
+            echo "📁 Processing batch users from input directory..."
+            ./bin/github-contribution-city -batch input/ -output output/
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/
+
+          if git diff --staged --quiet; then
+            echo "ℹ️  No changes detected in contribution calendars. Skipping commit."
+          else
+            git commit -m "chore(city): auto-update contribution city visualizations [skip ci]"
+            git push
+            echo "✅ Successfully committed and pushed updated visualizations."
+          fi
+
+      - name: Upload Output Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: contribution-city-visualizations
+          path: output/
+          retention-days: 30

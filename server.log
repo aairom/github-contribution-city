@@ -1,8 +1,0 @@
-
-🚀 GitHub Contribution City Web Server is starting...
-🌐 Application URL: http://localhost:8088
-   • Interactive 3D View: http://localhost:8088/?user=torvalds&theme=github-dark
-   • SVG Skyline:        http://localhost:8088/api/svg?user=torvalds&theme=github-dark
-   • 3D Isometric SVG:   http://localhost:8088/api/iso?user=torvalds&theme=github-dark
-   • JSON API Model:     http://localhost:8088/api/city?user=torvalds
-

@@ -79,9 +79,17 @@ go run cmd/city/main.go -user torvalds -format iso -theme cyberpunk
 go run cmd/city/main.go -user torvalds -format all
 ```
 
-### 3. Embed in GitHub Profile README
+### 3. Automated Daily Updates via GitHub Actions
 
-Once published or served, embed your dynamic contribution skyline directly into your profile:
+This repository includes an automated workflow [`.github/workflows/update-city.yml`](.github/workflows/update-city.yml) that automatically runs every day at 03:17 UTC (and on push/manual dispatch) to fetch your latest contribution calendar and push an updated SVG into your repository.
+
+You can then reference the static image in your GitHub Profile README:
+
+```markdown
+![My GitHub Contribution City](https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/output/contribution-city.svg)
+```
+
+Alternatively, if running the web server continuously (e.g., containerized or hosted):
 
 ```markdown
 ![My GitHub Contribution City](https://your-domain.com/api/svg?user=YOUR_USERNAME&theme=github-dark)
